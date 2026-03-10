@@ -1,5 +1,5 @@
 import { BrowserRouter, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
-import { Helmet } from 'react-helmet'
+import { Helmet, HelmetProvider } from 'react-helmet-async'
 import { AnimatePresence } from 'framer-motion'
 import { useEffect, useState } from 'react'
 import { BootSequence } from './components/BootSequence'
@@ -109,9 +109,11 @@ function AppShell() {
 
 function App() {
   return (
-    <BrowserRouter>
-      <AppShell />
-    </BrowserRouter>
+    <HelmetProvider>
+      <BrowserRouter>
+        <AppShell />
+      </BrowserRouter>
+    </HelmetProvider>
   )
 }
 
