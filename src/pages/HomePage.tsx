@@ -2,6 +2,7 @@ import { motion } from 'framer-motion'
 import { Phone, Mail, Github, Linkedin, MapPin } from 'lucide-react'
 import { PageTransition } from '../components/PageTransition'
 import { useEffect, useState } from 'react'
+import type { LucideIcon } from 'lucide-react'
 
 const HOOKS = [
   'I turn requirements into production-ready code.',
@@ -56,8 +57,15 @@ function TypewriterHook() {
   )
 }
 
+type Contact = {
+  label: string
+  value: string
+  icon: LucideIcon
+  href?: string
+}
+
 export function HomePage() {
-  const contacts = [
+  const contacts: Contact[] = [
     {
       label: 'Phone',
       value: '+91-8169703820',
@@ -86,12 +94,12 @@ export function HomePage() {
       value: 'Kharghar, Navi Mumbai, India',
       icon: MapPin,
     },
-  ] as const
+  ]
 
   const stats = [
     { value: '3+', label: 'Years Experience' },
     { value: '3',  label: 'Domains Shipped' },
-    { value: '4',  label: 'Projects Delivered' },
+    { value: '6',  label: 'Projects Delivered' },
     { value: '5',  label: 'Team Avg. Size' },
   ]
 
@@ -117,7 +125,7 @@ export function HomePage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.25 }}
         >
-          .NET &amp; Angular Developer · 3 Years Experience
+          .NET & Angular Developer · 3 Years Experience
         </motion.h2>
 
         {/* Typewriter hook */}
@@ -132,18 +140,17 @@ export function HomePage() {
 
         {/* Bio */}
         <motion.p
-  className="max-w-3xl text-foreground text-[clamp(0.95rem,1.5vw,1.15rem)] leading-relaxed border-l-2 border-primary pl-4"
-  initial={{ opacity: 0, y: 8 }}
-  animate={{ opacity: 1, y: 0 }}
-  transition={{ delay: 0.55 }}
->
-  Full-stack developer with 3 years of experience across the complete SDLC — from database
-  design and REST API development to Angular UI delivery. Specialized in ASP.NET Core and
-  Angular (8+) for enterprise web applications, with strong Python backend experience using
-  FastAPI, Flask, and Docker. Worked across Retail, Technology, and Import/Export domains,
-  delivering production systems with SQL Server, PostgreSQL, Redis, and AWS.
-</motion.p>
-
+          className="max-w-3xl text-foreground text-[clamp(0.95rem,1.5vw,1.15rem)] leading-relaxed border-l-2 border-primary pl-4"
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.55 }}
+        >
+          Full-stack developer with 3 years of experience across the complete SDLC — from database
+          design and REST API development to Angular UI delivery. Specialized in ASP.NET Core and
+          Angular (8+) for enterprise web applications, with strong Python backend experience using
+          FastAPI, Flask, and Docker. Worked across Retail, Technology, and Import/Export domains,
+          delivering production systems with SQL Server, PostgreSQL, Redis, and AWS.
+        </motion.p>
 
         {/* Stats row */}
         <motion.div
