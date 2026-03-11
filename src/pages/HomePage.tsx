@@ -81,7 +81,7 @@ export function HomePage() {
       label: 'GitHub',
       value: 'github.com/prathameshshivale',
       icon: Github,
-      href: 'https://github.com/prathameshshivale',
+      href: 'https://github.com/Machi2130',
     },
     {
       label: 'LinkedIn',
