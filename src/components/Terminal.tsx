@@ -24,6 +24,14 @@ const HELP_TEXT = [
   '  echo <text>         Print text',
 ]
 
+const NAV_SHORTCUTS = [
+  { label: 'home', path: '/' },
+  { label: 'about', path: '/about' },
+  { label: 'projects', path: '/projects' },
+  { label: 'skills', path: '/skills' },
+  { label: 'contact', path: '/contact' },
+] as const
+
 let idCounter = 0
 
 export function Terminal({ onNavigate }: TerminalProps) {
@@ -104,6 +112,14 @@ export function Terminal({ onNavigate }: TerminalProps) {
 
   const addEntry = (entry: Omit<Entry, 'id'>) => {
     setEntries((prev) => [...prev, { ...entry, id: ++idCounter }])
+  }
+
+  const handleShortcutNav = (path: string, label: string, addToTerminal?: boolean) => {
+    if (addToTerminal) {
+      addEntry({ type: 'input', text: `$ cd ${label}` })
+      addEntry({ type: 'output', text: `▶ Navigating to ${label}...` })
+    }
+    onNavigate(path)
   }
 
   const handleCommand = async (raw: string) => {
@@ -249,16 +265,19 @@ export function Terminal({ onNavigate }: TerminalProps) {
               ))}
             </div>
             <div className="border-t border-border px-3 py-1.5">
-              <div className="flex items-center gap-1">
-                <span className="text-terminal-bright">$</span>
-                <input
-                  ref={inputRef}
-                  className="flex-1 bg-transparent outline-none border-none text-terminal-bright caret-transparent"
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                />
-                <span className="terminal-cursor inline-block h-4 w-1 bg-terminal-bright" />
+              <div className="flex items-center gap-1 flex-wrap">
+                <span className="text-terminal-bright shrink-0">$</span>
+                <span className="inline-flex items-center min-w-0">
+                  <input
+                    ref={inputRef}
+                    className="bg-transparent outline-none border-none text-terminal-bright caret-transparent min-w-[1ch]"
+                    style={{ width: `${Math.max(1, input.length + 1)}ch` } as React.CSSProperties}
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                  />
+                  <span className="terminal-cursor inline-block h-4 w-1 bg-terminal-bright shrink-0 ml-0.5 align-middle" />
+                </span>
               </div>
               {isProcessing && (
                 <div className="mt-1 text-[10px] text-muted-foreground">
@@ -286,18 +305,110 @@ export function Terminal({ onNavigate }: TerminalProps) {
         </button>
       )}
 
-      {/* Mobile hint bar */}
-      {isMobileHint && (
-        <div className={`${baseClasses} ${mobileBar} items-center justify-between px-3`}>
-          <span className="text-[11px]">
-            Try: <span className="text-primary">cd about</span> |{' '}
-            <span className="text-primary">cd projects</span> |{' '}
-            <span className="text-primary">cd skills</span>
-          </span>
+      {/* Mobile: full terminal when expanded */}
+      <AnimatePresence>
+        {isMobileHint && isMaximized && (
+          <motion.div
+            className={`${baseClasses} fixed inset-0 z-50 flex flex-col`}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => inputRef.current?.focus()}
+          >
+            <div className="flex items-center justify-between border-b border-border bg-black/40 px-3 py-2">
+              <div className="flex items-center gap-2 text-terminal-bright">
+                <TerminalSquare className="h-4 w-4" />
+                <span className="text-xs">terminal@portfolio</span>
+              </div>
+              <button
+                type="button"
+                className="text-terminal-bright hover:text-primary transition-colors p-1 -m-1"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setIsMaximized(false)
+                }}
+                aria-label="Close terminal"
+              >
+                <Minimize2 className="h-5 w-5" />
+              </button>
+            </div>
+            <div ref={containerRef} className="flex-1 overflow-y-auto px-3 py-2 space-y-1 min-h-0">
+              {entries.map((entry) => (
+                <div
+                  key={entry.id}
+                  className={
+                    entry.type === 'error'
+                      ? 'text-destructive'
+                      : entry.type === 'input'
+                        ? 'text-terminal-bright'
+                        : 'text-foreground'
+                  }
+                >
+                  {entry.text}
+                </div>
+              ))}
+            </div>
+            <div className="border-t border-border px-3 py-2 flex-shrink-0 space-y-2">
+              <div className="flex flex-wrap gap-1.5">
+                {NAV_SHORTCUTS.map(({ label, path }) => (
+                  <button
+                    key={path}
+                    type="button"
+                    className="text-[11px] px-2 py-1 rounded border border-border bg-black/40 text-terminal-bright hover:bg-primary hover:text-primary-foreground transition-colors"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      handleShortcutNav(path, label, true)
+                    }}
+                  >
+                    cd {label}
+                  </button>
+                ))}
+              </div>
+              <div className="flex items-center gap-1 flex-wrap">
+                <span className="text-terminal-bright shrink-0">$</span>
+                <span className="inline-flex items-center min-w-0">
+                  <input
+                    ref={inputRef}
+                    className="bg-transparent outline-none border-none text-terminal-bright caret-transparent min-w-[1ch]"
+                    style={{ width: `${Math.max(1, input.length + 1)}ch` } as React.CSSProperties}
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                  />
+                  <span className="terminal-cursor inline-block h-4 w-1 bg-terminal-bright shrink-0 ml-0.5 align-middle" />
+                </span>
+              </div>
+              {isProcessing && (
+                <div className="mt-1 text-[10px] text-muted-foreground">
+                  ▶ Processing<span className="animate-pulse">...</span>
+                </div>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Mobile hint bar (when terminal not expanded) — tap shortcuts to navigate */}
+      {isMobileHint && !isMaximized && (
+        <div className={`${baseClasses} ${mobileBar} items-center gap-2 px-3`}>
+          <span className="text-[11px] text-muted-foreground shrink-0">Tap:</span>
+          <div className="flex flex-wrap items-center gap-1.5 min-w-0 flex-1">
+            {NAV_SHORTCUTS.map(({ label, path }) => (
+              <button
+                key={path}
+                type="button"
+                className="text-[11px] px-2 py-1 rounded border border-border bg-black/40 text-primary hover:bg-primary hover:text-primary-foreground transition-colors shrink-0"
+                onClick={() => handleShortcutNav(path, label)}
+              >
+                cd {label}
+              </button>
+            ))}
+          </div>
           <button
             type="button"
-            className="flex h-7 w-7 items-center justify-center border border-border bg-black/50 text-primary hover:bg-primary hover:text-primary-foreground transition-colors"
+            className="flex h-7 w-7 shrink-0 items-center justify-center border border-border bg-black/50 text-primary hover:bg-primary hover:text-primary-foreground transition-colors"
             onClick={() => setIsMaximized(true)}
+            aria-label="Open full terminal"
           >
             <Maximize2 className="h-3 w-3" />
           </button>
